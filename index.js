@@ -20,7 +20,7 @@ app.post('/insert', async (req, res) => {
 });
 
 app.get("/read", async (req, res) => {
-    TodoModel.find({}, (err, result) => {
+     TodoModel.find({}, (err, result) => {
         if (err) {
             res.send(err);
         } else {
@@ -31,20 +31,28 @@ app.get("/read", async (req, res) => {
 
 app.put('/update', async (req, res) => {
     const newTitle = req.body.newTitle;
+    const newDescription=req.body.newDescription;
     const _id = req.body._id;
-    try {
-        await TodoModel.findById(_id, (error, todoToUpdate) => {
-            if(error){
-                console.log(error)
-            }else{
-                todoToUpdate.title = newTitle;
-                todoToUpdate.save();
-            }
-        })
-    } catch (err) {
-        console.log(err);
-    }
-    res.send('updated!');
+        try {
+            await TodoModel.findById(_id, (error, todoToUpdate) => {
+                if (error) {
+                    console.log(error)
+                } else {
+                    todoToUpdate.title = newTitle;
+                    todoToUpdate.description=newDescription;
+                    todoToUpdate.save();
+                }
+            })
+        } catch (err) {
+            console.log(err);
+        }
+        res.send('updated!');
+});
+
+app.delete('/delete/:id', async (req, res) => {
+    const id = req.params.id;
+    await TodoModel.findByIdAndRemove(id).exec()
+    res.send('item deleted')
 });
 
 app.listen(5000, () => {
