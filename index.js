@@ -1,27 +1,52 @@
-const express=require('express');
-const app=express();
-const mongoose=require('mongoose');
-const TodoModel =require('./models/Todos')
+const express = require('express');
+const app = express();
+const cors = require('cors');
+const mongoose = require('mongoose');
+const TodoModel = require('./models/Todos')
 
 mongoose.Promise = global.Promise;
 mongoose.connect("mongodb://localhost:27017/todoDB");
 
-app.get('/insert', async (req,res)=>{
-    const  todo=new TodoModel({title:'nera',description:'my description'});
+app.use(cors())
+app.use(express.json());
+
+
+app.post('/insert', async (req, res) => {
+    const title = req.body.title;
+    const description = req.body.description;
+    const todo = new TodoModel({ title: title, description: description });
     await todo.save();
-    res.send("inserted data!");
+    res.send(todo);
 });
 
-app.get("/read", async (req,res)=>{
-    TodoModel.find({},(err,result)=>{
-        if(err){
+app.get("/read", async (req, res) => {
+    TodoModel.find({}, (err, result) => {
+        if (err) {
             res.send(err);
-        }else{
+        } else {
             res.send(result);
         }
     });
 });
 
-app.listen(5000,()=>{
+app.put('/update', async (req, res) => {
+    const newTitle = req.body.newTitle;
+    const _id = req.body._id;
+    try {
+        await TodoModel.findById(_id, (error, todoToUpdate) => {
+            if(error){
+                console.log(error)
+            }else{
+                todoToUpdate.title = newTitle;
+                todoToUpdate.save();
+            }
+        })
+    } catch (err) {
+        console.log(err);
+    }
+    res.send('updated!');
+});
+
+app.listen(5000, () => {
     console.log('you are connected!');
 });
